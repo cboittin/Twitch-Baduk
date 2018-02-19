@@ -1,0 +1,55 @@
+﻿{
+    "servers" : [
+        {
+            "name" : "Pandanet",
+            "pattern" : "gopanda",
+            "crop_left" : 18.2,
+            "crop_right" : 37.0,
+            "crop_top" : 16.0,
+            "crop_bottom" : 7.4,
+            "i_col" : false,
+            "reversed_rows" : true
+        },
+        {
+            "name" : "Tygem",
+            "pattern" : "tygem baduk",
+            "crop_left" : 13.0,
+            "crop_right" : 31.5,
+            "crop_top" : 3.8,
+            "crop_bottom" : 1.5,
+            "i_col" : true,
+            "reversed_rows" : false
+        },
+        {
+            "name" : "Foxxy",
+            "pattern" : "expert room",
+            "crop_left" : 9.9,
+            "crop_right" : 37.1,
+            "crop_top" : 3.8,
+            "crop_bottom" : 8.0,
+            "i_col" : true,
+            "reversed_rows" : false
+        },
+        {
+            "name" : "Crazystone",
+            "pattern" : "crazy stone",
+            "crop_left" : 27.0,
+            "crop_right" : 26.5,
+            "crop_top" : 13.3,
+            "crop_bottom" : 5.8,
+            "i_col" : false,
+            "reversed_rows" : true
+        }
+    ],
+    "keys" : {
+        "endProgram" : "esc",
+        "toggleCommunication" : "ctrl+p"
+    },
+    "use_server_coordinates" : true,
+    "setup_capture" : false,
+    "allowed_variations_per_user" : 999,
+    "reset_variation_count_timer" : 10,
+    "base_variation_displaying_time": 3,
+    "variation_displaying_time_per_stone": 2,
+    "time_between_captures": 0.5
+}
