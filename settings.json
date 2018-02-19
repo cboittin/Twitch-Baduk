@@ -1,4 +1,11 @@
 ﻿{
+    "twitch_channel": ">>> YOUR CHANNEL HERE <<<",
+    "twitch_bot_name": ">>> YOUR BOT's NAME HERE <<<",
+    "twitch_bot_oauth": ">>> YOUR BOT'S GENERATED OAUTH TOKEN HERE <<<",
+    "twitch_host": "irc.twitch.tv",
+    "twitch_port": 6667,
+    "twitch_buffer_size": 2048,
+    "twitch_chat_refresh_delay" : 1,
     "servers" : [
         {
             "name" : "Pandanet",
@@ -46,6 +53,8 @@
         "toggleCommunication" : "ctrl+p"
     },
     "use_server_coordinates" : true,
+    "coordinates_use_i_col" : false,
+    "coordinates_reversed_rows" : false,
     "setup_capture" : false,
     "allowed_variations_per_user" : 999,
     "reset_variation_count_timer" : 10,

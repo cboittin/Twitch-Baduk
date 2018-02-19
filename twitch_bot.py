@@ -7,15 +7,6 @@ from util import trace, letterToCol, settings
 from go_game import COLOR_BLACK, COLOR_WHITE, otherColor
 from sabaki_com import comInstance as sabakiCom
 
-TWITCH_HOST = "irc.twitch.tv"
-TWITCH_PORT = 6667
-CHANNEL =  ""
-BOT_PW = "oauth:"
-BOT_NAME = ""
-
-SOCKET_BUFFER_SIZE = 2048
-REFRESH_DELAY = 1
-
 class TwitchBot(Thread):
     
     def __init__(self, game):
@@ -27,6 +18,9 @@ class TwitchBot(Thread):
         for serv in settings["servers"]:
             self.servers[serv["name"]] = {"i_col": serv["i_col"], "reversed_rows": serv["reversed_rows"]}
         self.currentServer = None
+        self.channel = settings["twitch_channel"]
+        self.refreshRate = settings["twitch_chat_refresh_delay"]
+        self.socketBufferSize = settings["twitch_buffer_size"]
         self.initSocket()
         
     def initSocket(self):
@@ -34,17 +28,17 @@ class TwitchBot(Thread):
         sock.settimeout(2)
         
         try:
-            sock.connect( (TWITCH_HOST, TWITCH_PORT) )
+            sock.connect( (settings["twitch_host"], settings["twitch_port"]) )
         except:
-            trace("Cannot connect to server %s:%s" % (TWITCH_HOST, TWITCH_PORT), 0)
+            trace("Cannot connect to server %s:%s" % (settings["twitch_host"], settings["twitch_port"]), 0)
             return
         
         self.socket = sock    
         # sock.settimeout(None)
         
-        self.ircSend("PASS %s\r\n" % BOT_PW)
-        self.ircSend("NICK %s\r\n" % BOT_NAME)
-        self.ircSend("USER %s 8 * %s\r\n" % (BOT_NAME, BOT_NAME) )
+        self.ircSend("PASS %s\r\n" % settings["twitch_bot_oauth"])
+        self.ircSend("NICK %s\r\n" % settings["twitch_bot_name"])
+        self.ircSend("USER %s 8 * %s\r\n" % (settings["twitch_bot_name"], settings["twitch_bot_name"]) )
         
         data = sock.recv(1024)
         if "Login unsuccessful" in data:
@@ -53,18 +47,18 @@ class TwitchBot(Thread):
         else:
             trace("Logged in to twitch chat.", 1)
             
-        self.ircSend("JOIN #%s\r\n" % CHANNEL)
+        self.ircSend("JOIN #%s\r\n" % self.channel)
         self.running = True
         
     def ircSend(self, message):
         self.socket.send(message)
         
     def writeMessage(self, message):
-        self.ircSend("PRIVMSG #%s :%s" % (CHANNEL, message))
+        self.ircSend("PRIVMSG #%s :%s" % (self.channel, message))
         
     def getIRCData(self):
         try:
-            return self.socket.recv(SOCKET_BUFFER_SIZE)
+            return self.socket.recv(self.socketBufferSize)
         except socket.timeout:
             pass
         
@@ -79,7 +73,7 @@ class TwitchBot(Thread):
             return messages
         if "PING :tmi.twtich.tv" in data:
             self.ircSend("PONG :tmi.twitch.tv")
-        matches = re.findall(":(.+)\!(.+)\@(.+).tmi.twitch.tv PRIVMSG #%s :(.+)$" % CHANNEL, data, re.MULTILINE)
+        matches = re.findall(":(.+)\!(.+)\@(.+).tmi.twitch.tv PRIVMSG #%s :(.+)$" % self.channel, data, re.MULTILINE)
         for match in matches:
             print match
             user = match[0]
@@ -87,6 +81,23 @@ class TwitchBot(Thread):
             trace("Got message %s from %s" % (content, user), 1)
             messages.append( (content, user) )
         return messages
+    
+    def parseCoordinates(self, coordsStr):
+        col = int(letterToCol(coordsStr[0]))
+        row = int(coordsStr[1:]) - 1
+        iCol = None
+        reversedRows = None
+        if self.useServerCoordinates and self.currentServer is not None:
+            iCol = self.servers[self.currentServer]["i_col"]
+            reversedRows = self.servers[self.currentServer]["reversed_rows"]
+        else:
+            iCol = settings["coordinates_use_i_col"]
+            reversedRows = settings["coordinates_reversed_rows"]
+        if not iCol and col > 7:
+            col -= 1
+        if reversedRows:
+            row = 18 - row
+        return (col, row)
     
     def parseMessage(self, message):
         trace("Parsing message %s" % str(message), 1)
@@ -110,14 +121,8 @@ class TwitchBot(Thread):
             moves = []
             color = self.game.nextPlayer() if firstMove == 0 else firstMove
             for match in coordMatches:
-                col = int(letterToCol(match[0]))
-                row = int(match[1:]) - 1
-                if self.useServerCoordinates and self.currentServer is not None:
-                    if col > 7 and self.servers[self.currentServer]["i_col"] is False:
-                        col -= 1
-                    if self.servers[self.currentServer]["reversed_rows"] is True:
-                        row = 18 - row
-                moves.append( ((col, row), color) )
+                coords = self.parseCoordinates(match)
+                moves.append( (coords, color) )
                 color = otherColor(color)
             trace("Moves %s" % str(moves), 1)
             
@@ -150,7 +155,7 @@ class TwitchBot(Thread):
             messages = self.getMessages()
             for message in messages:
                 self.parseMessage(message)
-            time.sleep(REFRESH_DELAY)
+            time.sleep(self.refreshRate)
         trace("Twitch bot end", 2)
         
     def stop(self):
