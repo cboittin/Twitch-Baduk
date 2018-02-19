@@ -7,7 +7,6 @@ import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
 import tornado.web
-import socket
 import simplejson as json
 
 from util import trace, settings
