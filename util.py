@@ -23,4 +23,3 @@ def coordsToStr(coords):
 def letterToCol(letter):
     return ord(letter) - 97
     
-    
