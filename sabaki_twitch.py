@@ -32,7 +32,7 @@ class ProgramManager:
         th.start()
         
     def keyboardHookThread(self):
-    """ The keyboard hook seems to die sometimes, so we recreate it periodically """
+        """ The keyboard hook seems to die sometimes, so we recreate it periodically """
         while self.daemonThread is not None:
             while self.usingKeyboard:
                 time.sleep(0.1)
