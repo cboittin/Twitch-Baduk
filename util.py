@@ -1,6 +1,6 @@
 import simplejson as json
 
-TRACE_LEVEL = 2
+TRACE_LEVEL = 0
 def trace(msg, level=1):
     if level <= TRACE_LEVEL:
         print(msg)
