@@ -3,6 +3,7 @@ import keyboard # List of keyboard keys at https://github.com/boppreh/keyboard/b
 from subprocess import call
 import time
 import os
+from threading import Thread
 
 from game_capture import getScreenshotDaemon
 from sabaki_com import startSabakiCommunication
@@ -25,7 +26,24 @@ class ProgramManager:
         self.twitchBot.start()
         
         self.communicationActive = True
+        self.usingKeyboard = False
         
+        th = Thread(target=self.keyboardHookThread)
+        th.start()
+        
+    def keyboardHookThread(self):
+    """ The keyboard hook seems to die sometimes, so we recreate it periodically """
+        while self.daemonThread is not None:
+            while self.usingKeyboard:
+                time.sleep(0.1)
+            self.resetKeyboardHook()
+            time.sleep(1)
+        
+    def resetKeyboardHook(self):
+        try:
+            keyboard.unhook(self.keyCheck)
+        except:
+            pass
         keyboard.hook(self.keyCheck)
         
     def parseKeys(self):
@@ -50,6 +68,7 @@ class ProgramManager:
         return ctrl and shift and alt
         
     def keyCheck(self, kbEvent):
+        self.usingKeyboard = True
         if kbEvent.event_type == keyboard.KEY_DOWN:
             if kbEvent.name in ("ctrl", "left ctrl", "right ctrl"):
                 self.ctrl = True
@@ -78,6 +97,7 @@ class ProgramManager:
             elif kbEvent.name in ("alt", "left alt", "alt gr"):
                 self.alt = False
                 trace("alt released", 3)
+        self.usingKeyboard = False
         
     def endProgram(self):
         trace("Ending program", 0)

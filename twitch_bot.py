@@ -45,7 +45,7 @@ class TwitchBot(Thread):
             trace("Couldn't login to twitch chat, your bot's password is probably wrong.", 0)
             return
         else:
-            trace("Logged in to twitch chat.", 1)
+            trace("Logged in to twitch chat.", 0)
             
         self.ircSend("JOIN #%s\r\n" % self.channel)
         self.running = True

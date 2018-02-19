@@ -1,17 +1,5 @@
 import simplejson as json
 
-TRACE_LEVEL = 2
-def trace(msg, level=1):
-    if level <= TRACE_LEVEL:
-        print(msg)
-
-def coordsToStr(coords):
-    return chr(coords[0]+97) + chr(coords[1]+97)
-
-def letterToCol(letter):
-    return ord(letter) - 97
-    
-    
 settings = None
 class Settings:
     def __init__(self):
@@ -24,3 +12,15 @@ class Settings:
         return self.data[item]
 
 settings = Settings()
+
+def trace(msg, level=1):
+    if level <= settings["verbose_level"]:
+        print(msg)
+
+def coordsToStr(coords):
+    return chr(coords[0]+97) + chr(coords[1]+97)
+
+def letterToCol(letter):
+    return ord(letter) - 97
+    
+    
