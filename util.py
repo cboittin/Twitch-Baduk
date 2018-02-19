@@ -12,7 +12,6 @@ class Settings:
         return self.data[item]
 
 settings = Settings()
-
 def trace(msg, level=1):
     if level <= settings["verbose_level"]:
         print(msg)
@@ -22,5 +21,3 @@ def coordsToStr(coords):
 
 def letterToCol(letter):
     return ord(letter) - 97
-    
-    
