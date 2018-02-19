@@ -1,4 +1,8 @@
+#!/usr/bin/env python
 import keyboard # List of keyboard keys at https://github.com/boppreh/keyboard/blob/master/keyboard/_canonical_names.py
+from subprocess import call
+import time
+import os
 
 from game_capture import getScreenshotDaemon
 from sabaki_com import startSabakiCommunication
@@ -96,6 +100,9 @@ class ProgramManager:
             
 if __name__ == "__main__":
     mgr = ProgramManager()
-    mgr.comThread.join()
+    time.sleep(1)
+    sabakiDir = os.path.join(os.getcwd(), "Sabaki-master")
+    electronPath = os.path.join("node_modules", "electron", "dist", "electron.exe")
+    os.system("cd %s && %s ./" % (sabakiDir, electronPath) )
     keyboard.unhook_all()
     del mgr

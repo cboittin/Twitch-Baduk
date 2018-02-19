@@ -13,7 +13,8 @@ Sabaki github page : <https://github.com/SabakiHQ/Sabaki>
 
 In order to use the program, you'll need node.js (for Sabaki), python 2.7 and the listed modules (for this program), and the source files from this repo.
 Then, you'll have to set up the window capture properties so that they fit your screen and resolution, for each application you want to use with this program. 
-The default settings are set up for IGS/Pandanet, Foxwq, Tygem and CrazyStone, running in fullscreen for a resolution of 1680x1050 on Windows 7.
+
+The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, running in fullscreen for a resolution of 1680x1050 on Windows 7.
 
 #### Install node.js
 * from : <https://nodejs.org/en/>
@@ -56,7 +57,7 @@ The default settings are set up for IGS/Pandanet, Foxwq, Tygem and CrazyStone, r
 
 You can add any application you want by copy-pasting the properties for an existing application and replacing their values.
 
-#### Setting up the window captures
+#### Setting up the window capture
 
 The program uses a simplistic image recognition technique to turn the window capture into a go board position. The cropping therefore needs to be as accurate as possible.
 
