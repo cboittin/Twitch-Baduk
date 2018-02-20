@@ -40,6 +40,7 @@ The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, runnin
     * close sabaki
 
 #### Set up your twitch bot
+* Rename `settings.json.example` into `settings.json`
 * Open `settings.json`.
 * Fill in the 3 first properties.
     * `twitch_channel` : your channel's name in lowercase.
@@ -82,10 +83,10 @@ If it doesn't, open a command prompt, navigate to the program's folder and run `
 * `variation_displaying_time_per_stone`: Additional time a variation stays on screen, depending on the number of moves in it.
 * `time_between_captures`: Time in seconds between 2 window captures. Decrease for more responsiveness, increase if it slows your computer down.
 
-## How to navigate to a folder using the command prompt
+## How to navigate to a directory with the command prompt
 Use the command `cd`, which stands for "change directory".
 
-    example :   `cd C:\Users\Me\Desktop\twitch-sabaki-bot`
-                `cd Sabaki-master`
+    examples :   cd C:\Users\Me\Desktop\twitch-sabaki-bot
+                cd Sabaki-master
 
 On windows, if the program's folder is on the D: drive, you can change the drive by entering `d:`.

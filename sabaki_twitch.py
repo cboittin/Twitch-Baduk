@@ -103,10 +103,13 @@ class ProgramManager:
         trace("Ending program", 0)
         self.comThread.stop()
         del self.comThread
+        self.comThread = None
         self.twitchBot.stop()
         del self.twitchBot
+        self.twitchBot = None
         self.daemonThread.stop()
         del self.daemonThread
+        self.daemonThread = None
         
     def toggleCommunication(self):
         if self.communicationActive:

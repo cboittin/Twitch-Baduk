@@ -2,6 +2,7 @@ import socket
 import re
 from threading import Thread
 import time
+import datetime
 
 from util import trace, letterToCol, settings
 from go_game import COLOR_BLACK, COLOR_WHITE, otherColor
@@ -13,6 +14,7 @@ class TwitchBot(Thread):
         super(TwitchBot, self).__init__()
         self.running = False
         self.game = game
+        self.lastPing = None
         self.useServerCoordinates = settings["use_server_coordinates"]
         self.servers = {}
         for serv in settings["servers"]:
@@ -49,6 +51,13 @@ class TwitchBot(Thread):
             
         self.ircSend("JOIN #%s\r\n" % self.channel)
         self.running = True
+        self.lastPing = datetime.datetime.now()
+        
+    def checkConnection(self):
+        currentTime = datetime.datetime.now()
+        if (currentTime - self.lastPing).total_seconds() > 320:
+            trace("No ping received in the last 5 minutes, reconnecting to twitch chat ...", 0)
+            self.initSocket()
         
     def ircSend(self, message):
         self.socket.send(message)
@@ -58,9 +67,10 @@ class TwitchBot(Thread):
         
     def getIRCData(self):
         try:
-            return self.socket.recv(self.socketBufferSize)
+            data = self.socket.recv(self.socketBufferSize)
+            return data
         except socket.timeout:
-            pass
+            trace("No message from twitch", 2)
         
     def setCurrentServer(self, server):
         self.currentServer = server
@@ -71,14 +81,16 @@ class TwitchBot(Thread):
         data = self.getIRCData()
         if data is None:
             return messages
-        if "PING :tmi.twtich.tv" in data:
+        trace("Got message %s" % data, 3)
+        if "PING :tmi.twitch.tv" in data:
+            trace("Sending pong", 2)
             self.ircSend("PONG :tmi.twitch.tv")
         matches = re.findall(":(.+)\!(.+)\@(.+).tmi.twitch.tv PRIVMSG #%s :(.+)$" % self.channel, data, re.MULTILINE)
         for match in matches:
             print match
             user = match[0]
             content = match[3].rstrip()
-            trace("Got message %s from %s" % (content, user), 1)
+            trace("Got message %s from %s" % (content, user), 2)
             messages.append( (content, user) )
         return messages
     
@@ -155,6 +167,7 @@ class TwitchBot(Thread):
             messages = self.getMessages()
             for message in messages:
                 self.parseMessage(message)
+            self.checkConnection()
             time.sleep(self.refreshRate)
         trace("Twitch bot end", 2)
         
