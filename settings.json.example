@@ -10,20 +10,20 @@
         {
             "name" : "Pandanet",
             "pattern" : "gopanda",
-            "crop_left" : 18.2,
-            "crop_right" : 37.0,
-            "crop_top" : 16.0,
-            "crop_bottom" : 7.4,
+            "crop_left" : 18.6,
+            "crop_right" : 37.4,
+            "crop_top" : 14.5,
+            "crop_bottom" : 10.3,
             "i_col" : false,
             "reversed_rows" : true
         },
         {
             "name" : "Tygem",
             "pattern" : "tygem baduk",
-            "crop_left" : 13.0,
+            "crop_left" : 13.3,
             "crop_right" : 31.5,
-            "crop_top" : 3.8,
-            "crop_bottom" : 1.5,
+            "crop_top" : 1.2,
+            "crop_bottom" : 4.2,
             "i_col" : true,
             "reversed_rows" : false
         },
@@ -40,10 +40,10 @@
         {
             "name" : "Crazystone",
             "pattern" : "crazy stone",
-            "crop_left" : 27.0,
-            "crop_right" : 26.5,
-            "crop_top" : 13.3,
-            "crop_bottom" : 5.8,
+            "crop_left" : 27.2,
+            "crop_right" : 26.7,
+            "crop_top" : 9.5,
+            "crop_bottom" : 10.4,
             "i_col" : false,
             "reversed_rows" : true
         }
@@ -52,7 +52,7 @@
         "endProgram" : "esc",
         "toggleCommunication" : "ctrl+p"
     },
-    "use_server_coordinates" : true,
+    "use_server_coordinates" : false,
     "coordinates_use_i_col" : false,
     "coordinates_reversed_rows" : false,
     "setup_capture" : false,

@@ -1,7 +1,11 @@
 import win32gui
+import win32ui
+from ctypes import windll
 import time
 import os
 from threading import Thread
+import io
+import StringIO
 
 import pyscreenshot as ImageGrab
 import PIL
@@ -67,37 +71,98 @@ class ScreenshotDaemon(Thread):
         
         for name, serv in self.servers.iteritems():
             if serv["hwnd"] == hwnd:
-                bbox = win32gui.GetClientRect(hwnd)
-                w = bbox[2] - bbox[0]
-                h = bbox[3] - bbox[1]
-                l = bbox[0] + w * serv["cropleft"] / 100.0
-                r = bbox[2] - w * serv["cropright"] / 100.0
-                t = bbox[1] + h * serv["croptop"] / 100.0
-                b = bbox[3] - h * serv["cropbottom"] / 100.0
-                trace(bbox)
+                left, top, right, bot = win32gui.GetClientRect(hwnd)
+                w = right - left
+                h = bot - top
+                
+                hwndDC = win32gui.GetWindowDC(hwnd)
+                mfcDC  = win32ui.CreateDCFromHandle(hwndDC)
+                saveDC = mfcDC.CreateCompatibleDC()
+                
+                saveBitMap = win32ui.CreateBitmap()
+                saveBitMap.CreateCompatibleBitmap(mfcDC, w, h)
+
+                saveDC.SelectObject(saveBitMap)
+                
+                result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 1)
+                
+                bmpinfo = saveBitMap.GetInfo()
+                bmpstr = saveBitMap.GetBitmapBits(True)
+                
+                # FIXME find a way to make this work since it should be faster ?
+                # bmpstr2 = ""
+                # capBegin = (int(t)-top) * bmpinfo["bmWidth"]
+                # capW = int(r) - int(l)
+                # capH = int(b) - int(t)
+                # begin = capBegin
+                # for i in range(capH):
+                    # begin += bmpinfo["bmWidth"]
+                    # end = begin + capW
+                    # bmpstr2 += bmpstr[begin:end]
+                # print "%d - %d" % (capW * capH, len(bmpstr2))
+                # img = PIL.Image.frombytes("RGB", (capW, capH), bmpstr2, "raw", "BGRX", 0, 1)
+                # ioStr = StringIO.StringIO(bmpstr2)
+                # img = PIL.Image.open(ioStr)
+                w = bmpinfo["bmWidth"]
+                h = bmpinfo["bmHeight"]
+                img = PIL.Image.frombytes("RGB", (w, h), bmpstr, "raw", "BGRX", 0, 1)
+                
+                l = w * serv["cropleft"] / 100.0
+                r = w * (1 - serv["cropright"] / 100.0)
+                t = h * serv["croptop"] / 100.0
+                b = h * (1 - serv["cropbottom"] / 100.0)
                 trace("Capture coordinates : %d %d %d %d" % (l,t,r,b), 1)
-                if win32gui.GetForegroundWindow() == hwnd: # Check that the active window didn't change during the previous operations
-                    img = ImageGrab.grab( (l, t, r, b) )
-                    if self.debugCapture:
-                        img.show()
-                        # img.save(os.path.join("C:\\", "Users", "Me", "path, "to", "folder", str(self.counter) + ".jpg"))
-                    img = img.resize((19, 19), PIL.Image.BOX)
+                
+                img = img.crop( (l, t, r, b) )
+                
+                if self.debugCapture:
+                    img.show()
+                
+                win32gui.DeleteObject(saveBitMap.GetHandle())
+                saveDC.DeleteDC()
+                mfcDC.DeleteDC()
+                win32gui.ReleaseDC(hwnd, hwndDC)
+                
+                img = img.resize((19, 19), PIL.Image.BOX)
+                
+                board = []
+                
+                for i in range(19):
+                    col = []
+                    for j in range(19):
+                        color = replacePixel(img, (i, j))
+                        col.append(color)
+                    board.append(col)
                     
-                    board = []
+                if self.debugCapture:
+                    img.show()
                     
-                    for i in range(19):
-                        col = []
-                        for j in range(19):
-                            color = replacePixel(img, (i, j))
-                            col.append(color)
-                        board.append(col)
-                        
-                    if self.debugCapture:
-                        img.show()
-                        
-                    self.twitchBot.setCurrentServer(name)
-                    self.game.updateGame(board)
+                self.twitchBot.setCurrentServer(name)
+                self.game.updateGame(board)
                 return
+                
+                # if win32gui.GetForegroundWindow() == hwnd: # Check that the active window didn't change during the previous operations
+                    # img = ImageGrab.grab( (l, t, r, b) )
+                    # if self.debugCapture:
+                        # img.show()
+                        # # img.save(os.path.join("C:\\", "Users", "Me", "path, "to", "folder", str(self.counter) + ".jpg"))
+                    # img = img.resize((19, 19), PIL.Image.BOX)
+                    
+                    # board = []
+                    
+                    # for i in range(19):
+                        # col = []
+                        # for j in range(19):
+                            # color = replacePixel(img, (i, j))
+                            # col.append(color)
+                        # board.append(col)
+                        
+                    # if self.debugCapture:
+                        # img.show()
+                        
+                    # self.twitchBot.setCurrentServer(name)
+                    # self.game.updateGame(board)
+                # return
     
     def run(self):
         trace("Game capture daemon start", 2)

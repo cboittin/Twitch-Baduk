@@ -211,6 +211,11 @@ class Game:
             for j in range(19):
                 color = capture[i][j]
                 if color != self.lastCapture[i][j]:
+                    if color == 0:
+                        trace("Warning : too many moves were played before last update, resetting game", 0)
+                        self.reset(capture)
+                        trace("Game reset complete", 0)
+                        return
                     newMoves.append( ((i, j), color) )
         if len(newMoves) == 0:
             return
