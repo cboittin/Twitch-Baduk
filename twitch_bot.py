@@ -87,7 +87,6 @@ class TwitchBot(Thread):
             self.ircSend("PONG :tmi.twitch.tv")
         matches = re.findall(":(.+)\!(.+)\@(.+).tmi.twitch.tv PRIVMSG #%s :(.+)$" % self.channel, data, re.MULTILINE)
         for match in matches:
-            print match
             user = match[0]
             content = match[3].rstrip()
             trace("Got message %s from %s" % (content, user), 2)
@@ -112,7 +111,7 @@ class TwitchBot(Thread):
         return (col, row)
     
     def parseMessage(self, message):
-        trace("Parsing message %s" % str(message), 1)
+        trace("Parsing message %s" % str(message), 2)
         content, user = message
         # Check for game sequence
         coordMatches = re.findall("[a-z][0-9]{1,2}", content)
