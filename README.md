@@ -93,11 +93,12 @@ To help you finding the proper settings, you can set the `setup_capture` propert
 
 ## TODO
 
-* Close sabaki as well when ending the program
 * Add setting to generate a greenscreen image with the moves from the twitch variations
 * Add setting to use sabaki at all
 * Add hotkey to recreate sgf with all proposed variations
 * Add hotkey to save sgf
+* OBS plugin to switch scenes when a variation is proposed
+* Code cleaning
 * Probably some bug fixing
 
 ## How to navigate to a directory with the command prompt

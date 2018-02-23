@@ -46,16 +46,14 @@ class App extends Component {
             let action = msg["action"]
             console.log("got message " + action)
             if (action === "play") {
-                /*
-                app.newFile()
-                let data = msg["data"]
-                for(let i=0; i < data.length; i++) {
-                    app.clickVertex(data[i])
-                 }
-                console.log("Game with " + data.length + " moves.")
-                */
-               //app.loadFile("C:/Users/Moi/Desktop/Go/foxy5k.sgf")
                app.loadContent(msg["data"], "sgf", {suppressAskForSave: true})
+            } else if (action === "close") {
+                console.log("Closing Sabaki ...")
+                this.send("Closing Sabaki")
+                app.detachEngines()
+                app.closeWindow = true
+                app.window.close()
+                app.quit()
             }
         }
         

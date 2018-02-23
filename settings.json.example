@@ -61,5 +61,7 @@
     "base_variation_displaying_time": 3,
     "variation_displaying_time_per_stone": 2,
     "time_between_captures": 0.5,
+    "generate_greenscreen_image": true,
+    "greenscreen_image_path": "./greenscreen/",
     "verbose_level": 0
 }

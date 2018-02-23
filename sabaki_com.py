@@ -93,8 +93,13 @@ class SabakiCommunication(Thread):
         trace("Websocket server end", 1)
         
     def stop(self):
+        self.wsHandler.close()
         tornado.ioloop.IOLoop.instance().stop()
         
+    def closeSabaki(self):
+        trace("Sending close request to Sabaki", 1)
+        self.wsHandler.write_message(json.dumps({"action": "close"}, separators=(",", ":") ))
+
     def sendGame(self, sgf):
         trace("Sending game to sabaki", 1)
         self.wsHandler.write_message(json.dumps({"action": "play", "data": sgf}, separators=(",", ":") ))

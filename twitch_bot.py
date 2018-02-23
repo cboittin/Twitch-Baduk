@@ -172,6 +172,9 @@ class TwitchBot(Thread):
     def stop(self):
         self.running = False
         
+    def generateGreenScreen(self, variation, user):
+        pass
+        
 def getTwitchBot(gameState):
     bot = TwitchBot(gameState)
     return bot
