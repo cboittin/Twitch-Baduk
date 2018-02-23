@@ -88,19 +88,19 @@ class SabakiCommunication(Thread):
         self.wsHandler = wsHandler
         
     def run(self):
-        trace("Websocket server start", 2)
+        trace("Websocket server start", 1)
         tornado.ioloop.IOLoop.instance().start()
-        trace("Websocket server end", 2)
+        trace("Websocket server end", 1)
         
     def stop(self):
         tornado.ioloop.IOLoop.instance().stop()
         
     def sendGame(self, sgf):
-        trace("Sending game", 1)
+        trace("Sending game to sabaki", 1)
         self.wsHandler.write_message(json.dumps({"action": "play", "data": sgf}, separators=(",", ":") ))
 
     def sendVariation(self, sgf):
-        trace("Sending variation", 1)
+        trace("Sending variation to sabaki", 1)
         self.wsHandler.write_message(json.dumps({"action": "play", "data": sgf}, separators=(",", ":") ))
         
     def updateGameState(self, sgf):
@@ -146,7 +146,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.write_message(json.dumps({"action": "hi !"}, separators=(",", ":") ))
     
     def on_message(self, message):
-        trace("From Sabaki : " + message, 0)
+        trace("From Sabaki : " + message, 1)
         
     def on_close(self):
         trace("Sabaki connection closed", 0)

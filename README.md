@@ -1,4 +1,4 @@
-# twitch-sabaki-bot
+# twitch-Sabaki-bot
 
 ## Description
 
@@ -8,6 +8,14 @@ You can then show the Sabaki window on your stream to make interactive reviews, 
 Currently only works on Windows, tested with python 2.7 in windows 7.
 
 Sabaki github page : <https://github.com/SabakiHQ/Sabaki>
+
+## Usage ##
+
+Simply run sabaki_twitch.py to launch the program. Press escape from anywhere to end it (you have to close Sabaki manually as well). You can interrupt sending moves to Sabaki by pressing ctrl+K, and resume it by pressing ctrl+P again.
+
+Twitch chat can send variations by writing their coordinates, for example : `k10 d16 c4 q16 r4`. It is possible to force the first move being a specific color by beginning the sequence with `b` or `w` : `b q16 r14 p17 s16 r17 r11`. Variations show in Sabaki for a few seconds, depending on the number of moves in the variation, then the game reverts to its current state. You can press ctrl+K to keep the variation on Sabaki.
+
+If double clicking the launcher doesn't work, open a command prompt, navigate to the program's folder and run `python Sabaki_twitch.py`. If this doesn't work either, check your `PATH` environment variable, and verify that it contains python's installation folder, and the Scripts subfolder inside it.
 
 ## Installation
 
@@ -37,7 +45,7 @@ The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, runnin
 * run command `npm install`
 * run command `npm run build`
 * run command `npm start` to check if everything works correctly
-    * close sabaki
+    * close Sabaki
 
 #### Set up your twitch bot
 * Rename `settings.json.example` into `settings.json`
@@ -49,7 +57,7 @@ The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, runnin
 
 #### Set up the window capture and/or add new applications to capture
 * Open `settings.json`
-* The applications are listed under the "servers" property. A server is composed of the following properties.
+* The applications are listed under the `servers` property. A server is composed of the following properties.
     * `name` : an identifier for the program.
     * `pattern` : a string to look for in the application's window title. This is how the program will find the window to capture.
     * `crop_left`, `crop_right`, `crop_top`, `crop_bottom` : the relative portion (%) of the window to crop out in each direction, in order to get the image of the goban only.
@@ -63,11 +71,6 @@ You can add any application you want by copy-pasting the properties for an exist
 The program uses a simplistic image recognition technique to turn the window capture into a go board position. The cropping therefore needs to be as accurate as possible.
 
 To help you finding the proper settings, you can set the `setup_capture` property to true. Each screenshot taken by the program will then be shown to you. You still need to restart the program to update the settings every time.
-    
-## How to launch the program
-Usually, simply double clicking `sabaki_twitch.py` should work.
-
-If it doesn't, open a command prompt, navigate to the program's folder and run `python sabaki_twitch.py`. If this doesn't work either, check your `PATH` environment variable, and verify that it contains python's installation folder, and the Scripts subfolder inside it.
 
 ## Other useful settings
 
@@ -83,10 +86,24 @@ If it doesn't, open a command prompt, navigate to the program's folder and run `
 * `variation_displaying_time_per_stone`: Additional time a variation stays on screen, depending on the number of moves in it.
 * `time_between_captures`: Time in seconds between 2 window captures. Decrease for more responsiveness, increase if it slows your computer down.
 
+#### Hotkeys
+* The hotkeys are located under the `keys` property. Be aware that the hotkeys are active globally, pressing a hotkey in another application might trigger them.
+    * `endProgram` : hotkey to end the program, defaults to escape.
+    * `toggleCommunication` : Interrupts/Resume sending updates to Sabaki
+
+## TODO
+
+* Close sabaki as well when ending the program
+* Add setting to generate a greenscreen image with the moves from the twitch variations
+* Add setting to use sabaki at all
+* Add hotkey to recreate sgf with all proposed variations
+* Add hotkey to save sgf
+* Probably some bug fixing
+
 ## How to navigate to a directory with the command prompt
 Use the command `cd`, which stands for "change directory".
 
-    examples :   cd C:\Users\Me\Desktop\twitch-sabaki-bot
+    examples :   cd C:\Users\Me\Desktop\twitch-Sabaki-bot
                 cd Sabaki-master
 
 On windows, if the program's folder is on the D: drive, you can change the drive by entering `d:`.

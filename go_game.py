@@ -144,7 +144,6 @@ class SgfMaker:
             markup.append("%s:%d" % (coords, i+1))
             markupString = "][".join(markup)
             current = current.addChild( Node(move[1], coords, fromNode.moveNumber + 1 + i, markupString) )
-            trace(markupString)
         
         if pending:
             variationBegin.prev = fromNode # Don't link it to the sgf right away because it might cause issues when updating the live game
@@ -170,6 +169,146 @@ class SgfMaker:
         if self.root is not None:
             self.sgfString += self.root.sgfTree()
         
+class Group:
+    """ Describe the state of a group of connected stones within a Go game """
+    def __init__(self, id, pos, color, libs):
+        self.pos = pos
+        self.moves = [pos]
+        self.color = color
+        self.liberties = libs
+        self.id = id
+        
+    def isDead(self):
+        return len(self.liberties) <= 0
+        
+    def addStone(self, pos, libs):
+        self.moves.append(pos)
+        self.removeLiberty(pos)
+        self.liberties |= libs
+        
+    def addLiberty(self, lib):
+        self.liberties.add(lib)
+    
+    def removeLiberty(self, lib):
+        self.liberties.remove(lib)
+        
+    def merge(self, other):
+        """ Merge 2 groups together """
+        trace("Merging group %d into group %d" % (other.id, self.id), 2)
+        self.moves += other.moves
+        self.liberties |= other.liberties
+        
+class Board:
+    def __init__(self, capture=None):
+        self.groups = {}
+        self.nextGroupId = 0
+        self.board = []
+        for _ in range(19):
+            col = []
+            for _ in range(19):
+                col.append(None)
+            self.board.append(col)
+        if capture is not None:
+            for x in range(19):
+                for y in range(19):
+                    color = capture[x][y]
+                    if color != 0:
+                        trace("Adding stone %d at %d - %d" % (color, x, y), 2)
+                        self.addStone( (x, y), color)
+                    
+    def __getitem__(self, pos):
+        group = self.getGroupAt(pos)
+        if group is None:
+            return 0
+        return group.color
+        
+    def getGroupAt(self, pos):
+        groupID = self.board[pos[0]][pos[1]]
+        if groupID is None:
+            return None
+        return self.groups[groupID]
+        
+    def addStone(self, pos, color):
+        friends, enemies, libs = self.adjacent(pos, color)
+        groupID = None
+        if len(friends) == 0:
+            # Create new group
+            groupID = self.createGroup(pos, color, libs)
+        else:
+            # Add the stone to one nearby group, then bind any other adjacent group to it
+            ref = friends.pop()
+            ref.addStone(pos, libs)
+            for i in range(len(friends)):
+                group = friends.pop()
+                self.mergeGroups(ref, group)
+            groupID = ref.id
+        x, y = pos
+        self.board[x][y] = groupID
+        self.checkCaptures(pos, enemies)
+        return groupID
+        
+    def mergeGroups(self, ref, other):
+        if ref.id == other.id:
+            return
+        ref.merge(other)
+        for move in other.moves:
+            x, y = move
+            self.board[x][y] = ref.id
+        self.groups.pop(other.id)
+        
+    def checkCaptures(self, pos, toCheck):
+        for group in toCheck:
+            group.removeLiberty(pos)
+            if group.isDead():
+                self.removeGroup(group)
+    
+    def removeGroup(self, group):
+        trace("Killing group %d" % group.id, 2)
+        for move in group.moves:
+            _, enemies, _ = self.adjacent(move, group.color)
+            x, y = move
+            self.board[x][y] = None
+            for enemy in enemies:
+                enemy.addLiberty(move)
+        self.groups.pop(group.id)
+    
+    def createGroup(self, pos, color, libs):
+        group = Group(self.nextGroupId, pos, color, libs)
+        self.groups[group.id] = group
+        trace("Created group %d at %d - %d" % (group.id, pos[0], pos[1]), 2)
+        self.nextGroupId += 1
+        return group.id
+    
+    def adjacent(self, pos, color):
+        adjacent = []
+        x, y = pos
+        if x > 0: adjacent.append( (x-1, y) )
+        if x < 18: adjacent.append( (x+1, y) )
+        if y > 0: adjacent.append( (x, y-1) )
+        if y < 18: adjacent.append( (x, y+1) )
+        friends = set([])
+        enemies = set([])
+        libs = set([])
+        for adj in adjacent:
+            group = self.getGroupAt(adj)
+            if group is None:
+                libs.add(adj)
+            elif group.color == color:
+                friends.add(group)
+            else:
+                enemies.add(group)
+        return (friends, enemies, libs)
+        
+    def toStr(self):
+        s = ""
+        for y in range(19):
+            for x in range(19):
+                if self[x, y] == COLOR_BLACK: s+= "+"
+                elif self[x, y] == COLOR_WHITE: s+= "-"
+                else: s+= " "
+            s += "\n"
+        return s
+    
 class Game:
     """ Internal representation of the state of a game of of Go. This is the class you are supposed to interact with. """
     
@@ -179,47 +318,59 @@ class Game:
         self.nextvariationIndex = 0
         
     def reset(self, capture=None):
+        self.board = Board(capture)
         if capture is None:
             self.state = SgfMaker()
             self.nextToPlay = COLOR_BLACK
-            self.lastCapture = []
-            for _ in range(19):
-                col = []
-                for _ in range(19):
-                    col.append(0)
-                self.lastCapture.append(col)
         else:
             # Parse the image to get the initial position
             initPos = []
             for i in range(19):
-                trace("i : %d" % i, 3)
                 for j in range(19):
-                    trace("j : %d" % j, 3)
                     color = capture[i][j]
                     if color != 0:
                         initPos.append( ((i, j), color) )
             self.state = SgfMaker(initialPosition = initPos)
             self.nextToPlay = 0
-            self.lastCapture = capture
     
     def nextPlayer(self):
         return self.nextToPlay if self.nextToPlay != 0 else COLOR_BLACK
     
     def updateGame(self, capture):
         newMoves = []
+        potentialCapture = False
         for i in range(19):
             for j in range(19):
                 color = capture[i][j]
-                if color != self.lastCapture[i][j]:
+                if color != self.board[i, j]:
                     if color == 0:
-                        trace("Warning : too many moves were played before last update, resetting game", 0)
+                        potentialCapture = True
+                    newMoves.append( ((i, j), color) )
+        if potentialCapture:
+            groups = set([])
+            addedStones = []
+            colors = []
+            for pos, color in newMoves:
+                if color == 0:
+                    groups.add( self.board.getGroupAt(pos) )
+                else:
+                    addedStones.append(pos)
+                    colors.append(color)
+            for group in groups:
+                for lib in group.liberties:
+                    if lib not in addedStones:
+                        trace("Liberties %s were never filled" % str(group.liberties), 0)
+                        trace("Warning : couldn't find the order of moves, resetting game", 0)
                         self.reset(capture)
                         trace("Game reset complete", 0)
                         return
-                    newMoves.append( ((i, j), color) )
+            newMoves = []
+            for i in range(len(addedStones)):
+                newMoves.append( (addedStones[i], colors[i]) )                
         if len(newMoves) == 0:
             return
         elif len(newMoves) > 2:
+            import time; time.sleep(2)
             trace("Warning : too many moves were played before last update, resetting game", 0)
             self.reset(capture)
             trace("Game reset complete", 0)
@@ -227,6 +378,7 @@ class Game:
             pos, color = newMoves[0]
             self.addMove(pos, color)
         else:
+            # FIXME check for snapback
             knowWhoPlaysNext = True
             if self.nextToPlay == 0:
                 knowWhoPlaysNext = False
@@ -240,10 +392,10 @@ class Game:
             self.addMove(secondMove[0], secondMove[1])
             if not knowWhoPlaysNext:
                 self.nextToPlay = 0
-        self.lastCapture = capture
     
     def addMove(self, move, color):
         self.state.addMove(move, color)
+        self.board.addStone(move, color)
         self.nextToPlay = otherColor(color)
     
     def addVariation(self, moves, fromMoveNumber=9999):

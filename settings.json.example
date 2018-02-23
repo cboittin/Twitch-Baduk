@@ -50,7 +50,7 @@
     ],
     "keys" : {
         "endProgram" : "esc",
-        "toggleCommunication" : "ctrl+p"
+        "toggleCommunication" : "ctrl+k"
     },
     "use_server_coordinates" : false,
     "coordinates_use_i_col" : false,

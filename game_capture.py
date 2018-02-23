@@ -45,7 +45,7 @@ class ScreenshotDaemon(Thread):
         def enum_cb(hwnd, results):
             title = win32gui.GetWindowText(hwnd)
             if title != "":
-                trace("Found window %s - %s " % (hwnd, title), level=2)
+                trace("Found window %s - %s " % (hwnd, title), 3)
             winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
         win32gui.EnumWindows(enum_cb, toplist)
 
@@ -59,9 +59,7 @@ class ScreenshotDaemon(Thread):
             except Exception:
                 trace("Couldn't find a window handle for server " + serv["name"], 2)
 
-        trace("\n#####\nServers found:\n")
-        trace(self.servers)
-        trace("\n#####\n")
+        trace("\n#####\nServers found:\n%s\n#####\n" % str(self.servers), 1)
         
     def takeScreenshot(self):
         # ----- Capture the corresponding part of the screen -----
@@ -111,7 +109,7 @@ class ScreenshotDaemon(Thread):
                 r = w * (1 - serv["cropright"] / 100.0)
                 t = h * serv["croptop"] / 100.0
                 b = h * (1 - serv["cropbottom"] / 100.0)
-                trace("Capture coordinates : %d %d %d %d" % (l,t,r,b), 1)
+                trace("Capture coordinates : %d %d %d %d" % (l,t,r,b), 2)
                 
                 img = img.crop( (l, t, r, b) )
                 
@@ -165,13 +163,13 @@ class ScreenshotDaemon(Thread):
                 # return
     
     def run(self):
-        trace("Game capture daemon start", 2)
+        trace("Game capture daemon start", 1)
         self.active = True
         self.counter = 0
         while self.active:
             gameMoves = self.game.state.nMoves
             if self.counter % 10 == 0:
-                trace("self moves %d - game moves %d" % (self.nMoves, gameMoves), 1)
+                trace("self moves %d - game moves %d" % (self.nMoves, gameMoves), 2)
                 self.findLaunchedApps()
             self.takeScreenshot()
             self.counter += 1
@@ -181,11 +179,11 @@ class ScreenshotDaemon(Thread):
             if gameMoves != self.nMoves:
                 sabakiCom.updateGameState(self.game.getSgf())
                 self.nMoves = gameMoves
-        trace("Game capture daemon end", 2)
+        trace("Game capture daemon end", 1)
             
     def stop(self):
         self.active = False
-            
+    
 def getScreenshotDaemon(gameState, twitchBot):
     daemonThread = ScreenshotDaemon(gameState, twitchBot)
     return daemonThread
