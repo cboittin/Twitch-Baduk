@@ -59,7 +59,7 @@ class ScreenshotDaemon(Thread):
             except Exception:
                 trace("Couldn't find a window handle for server " + serv["name"], 2)
 
-        trace("\n#####\nServers found:\n%s\n#####\n" % str(self.servers), 1)
+        trace("\n#####\nServers found:\n%s\n#####\n" % str(self.servers.keys()), 1)
         
     def takeScreenshot(self):
         # ----- Capture the corresponding part of the screen -----
@@ -168,7 +168,7 @@ class ScreenshotDaemon(Thread):
         self.counter = 0
         while self.active:
             gameMoves = self.game.state.nMoves
-            if self.counter % 10 == 0:
+            if self.counter % 100 == 0:
                 trace("self moves %d - game moves %d" % (self.nMoves, gameMoves), 2)
                 self.findLaunchedApps()
             self.takeScreenshot()

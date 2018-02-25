@@ -5,35 +5,38 @@ import time
 import os
 from threading import Thread
 
-from game_capture import getScreenshotDaemon
-from sabaki_com import startSabakiCommunication
 from twitch_bot import getTwitchBot
 from go_game import Game
 from util import trace, settings
     
 class ProgramManager:
     def __init__(self):
+        
         self.parseKeys()
-        
-        self.gameState = Game()
-        
-        self.comThread = startSabakiCommunication()
-        self.twitchBot = getTwitchBot(self.gameState)
-        self.daemonThread = getScreenshotDaemon(self.gameState, self.twitchBot)
-        
-        self.daemonThread.start()
-        self.comThread.start()
-        self.twitchBot.start()
-        
         self.communicationActive = True
         self.usingKeyboard = False
         
+        self.gameState = Game()
+        self.useSabaki = settings["use_sabaki"]
+        
+        self.twitchBot = getTwitchBot(self.gameState)
+        self.twitchBot.start()
+        
+        if self.useSabaki:
+            from game_capture import getScreenshotDaemon
+            from sabaki_com import startSabakiCommunication
+            self.comThread = startSabakiCommunication()
+            self.comThread.start()
+            self.daemonThread = getScreenshotDaemon(self.gameState, self.twitchBot)
+            self.daemonThread.start()
+        
+        
         th = Thread(target=self.keyboardHookThread)
         th.start()
-        
+    
     def keyboardHookThread(self):
         """ The keyboard hook seems to die sometimes, so we recreate it periodically """
-        while self.daemonThread is not None:
+        while self.twitchBot is not None:
             while self.usingKeyboard:
                 time.sleep(0.1)
             self.resetKeyboardHook()
@@ -101,18 +104,21 @@ class ProgramManager:
         
     def endProgram(self):
         trace("Ending program", 0)
-        self.comThread.closeSabaki()
         self.twitchBot.stop()
         del self.twitchBot
         self.twitchBot = None
-        self.daemonThread.stop()
-        del self.daemonThread
-        self.daemonThread = None
-        self.comThread.stop()
-        del self.comThread
-        self.comThread = None
-        
+        if self.useSabaki:
+            self.comThread.closeSabaki()
+            self.daemonThread.stop()
+            del self.daemonThread
+            self.daemonThread = None
+            self.comThread.stop()
+            del self.comThread
+            self.comThread = None
+    
     def toggleCommunication(self):
+        if not self.useSabaki:
+            return
         if self.communicationActive:
             trace("Pausing updates to sabaki", 0)
             self.comThread.pauseComms()
@@ -124,9 +130,11 @@ class ProgramManager:
             
 if __name__ == "__main__":
     mgr = ProgramManager()
-    time.sleep(1)
-    sabakiDir = os.path.join(os.getcwd(), "Sabaki-master")
-    electronPath = os.path.join("node_modules", "electron", "dist", "electron.exe")
-    os.system("cd %s && %s ./" % (sabakiDir, electronPath) )
+    if mgr.useSabaki:
+        time.sleep(1)
+        sabakiDir = os.path.join(os.getcwd(), "Sabaki-master")
+        electronPath = os.path.join("node_modules", "electron", "dist", "electron.exe")
+        os.system("cd %s && %s ./" % (sabakiDir, electronPath) )
+    mgr.twitchBot.join()
     keyboard.unhook_all()
     del mgr

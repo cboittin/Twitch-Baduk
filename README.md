@@ -3,7 +3,7 @@
 ## Description
 
 This program takes screenshots of the games you play on any application, in order to send them to the Sabaki application, and allows the twitch chat to interact with Sabaki by proposing variations.
-You can then show the Sabaki window on your stream to make interactive reviews, or to let the chat review their own moves.
+You can then show the Sabaki window on your stream to make interactive reviews, or to let the chat review their own moves. It can also generate a greenscreen image with the proposed variation, to display on top of your board.
 
 Currently only works on Windows, tested with python 2.7 in windows 7.
 
@@ -16,6 +16,8 @@ Simply run sabaki_twitch.py to launch the program. Press escape from anywhere to
 Twitch chat can send variations by writing their coordinates, for example : `k10 d16 c4 q16 r4`. It is possible to force the first move being a specific color by beginning the sequence with `b` or `w` : `b q16 r14 p17 s16 r17 r11`. Variations show in Sabaki for a few seconds, depending on the number of moves in the variation, then the game reverts to its current state. You can press ctrl+K to keep the variation on Sabaki.
 
 If double clicking the launcher doesn't work, open a command prompt, navigate to the program's folder and run `python Sabaki_twitch.py`. If this doesn't work either, check your `PATH` environment variable, and verify that it contains python's installation folder, and the Scripts subfolder inside it.
+
+The greenscreen image is located in `greenscreen/greenscreen.png`
 
 ## Installation
 
@@ -74,6 +76,11 @@ To help you finding the proper settings, you can set the `setup_capture` propert
 
 ## Other useful settings
 
+#### Hotkeys
+* The hotkeys are located under the `keys` property. Be aware that the hotkeys are active globally, pressing a hotkey in another application might trigger them.
+    * `endProgram` : hotkey to end the program, defaults to escape.
+    * `toggleCommunication` : Interrupts/Resume sending updates to Sabaki
+    
 #### Coordinates
 * `use_server_coordinates` : If set to false, will use the same coordinate system for all applications. Useful if your overlay integrates the coordinates.
 * `coordinates_use_i_col` : Same as "i_col" if you do not use server coordinates, useless otherwise.
@@ -84,20 +91,20 @@ To help you finding the proper settings, you can set the `setup_capture` propert
 * `reset_variation_count_timer` : Time in minutes before resetting the variation count for everyone.
 * `base_variation_displaying_time`: Base time a variation stays on screen.
 * `variation_displaying_time_per_stone`: Additional time a variation stays on screen, depending on the number of moves in it.
-* `time_between_captures`: Time in seconds between 2 window captures. Decrease for more responsiveness, increase if it slows your computer down.
 
-#### Hotkeys
-* The hotkeys are located under the `keys` property. Be aware that the hotkeys are active globally, pressing a hotkey in another application might trigger them.
-    * `endProgram` : hotkey to end the program, defaults to escape.
-    * `toggleCommunication` : Interrupts/Resume sending updates to Sabaki
+#### Greenscreen & sabaki
+* `generate_greenscreen_image` : generate the greenscreen image when tiwtch proposes a variation
+* `greenscreen_image_path`: `./greenscreen/greenscreen.png`,
+* `greenscreen_padding_left`, `greenscreen_padding_right`, `greenscreen_padding_top`, `greenscreen_padding_bottom` : reduces the area of the greenscreen in which to display the moves
+* `use_sabaki` : Launch sabaki with the program, and the window capture to generate go games
+* `time_between_captures`: Time in seconds between 2 window captures. Decrease for more responsiveness, increase if it slows your computer down.
 
 ## TODO
 
-* Add setting to generate a greenscreen image with the moves from the twitch variations
-* Add setting to use sabaki at all
 * Add hotkey to recreate sgf with all proposed variations
 * Add hotkey to save sgf
 * OBS plugin to switch scenes when a variation is proposed
+* Find a way to detect snapbacks when 2 moves have been played before last update
 * Code cleaning
 * Probably some bug fixing
 
