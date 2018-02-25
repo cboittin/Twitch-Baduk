@@ -1,12 +1,13 @@
 import socket
 import re
-from threading import Thread
+import os
+from threading import Thread, Timer
 import time
 import datetime
 
 from util import trace, letterToCol, settings
 from go_game import COLOR_BLACK, COLOR_WHITE, otherColor
-from sabaki_com import comInstance as sabakiCom
+from greenscreen import GreenScreenGenerator
 
 class TwitchBot(Thread):
     
@@ -14,17 +15,29 @@ class TwitchBot(Thread):
         super(TwitchBot, self).__init__()
         self.running = False
         self.game = game
-        self.lastPing = None
         self.useServerCoordinates = settings["use_server_coordinates"]
+        self.useSabaki = settings["use_sabaki"]
+        if self.useSabaki:
+            from sabaki_com import comInstance as sabakiCom
+        
+        self.channel = settings["twitch_channel"]
+        self.refreshRate = settings["twitch_chat_refresh_delay"]
+        self.socketBufferSize = settings["twitch_buffer_size"]
         self.servers = {}
         for serv in settings["servers"]:
             self.servers[serv["name"]] = {"i_col": serv["i_col"], "reversed_rows": serv["reversed_rows"]}
         self.currentServer = None
-        self.channel = settings["twitch_channel"]
-        self.refreshRate = settings["twitch_chat_refresh_delay"]
-        self.socketBufferSize = settings["twitch_buffer_size"]
+        self.lastPing = None
+        
+        self.greenscreenActive = settings["generate_greenscreen_image"]
+        if self.greenscreenActive:
+            self.greenScreenGenerator = GreenScreenGenerator()
+        
         self.initSocket()
         
+        
+##### IRC socket management #####
+    
     def initSocket(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(2)
@@ -75,21 +88,24 @@ class TwitchBot(Thread):
     def setCurrentServer(self, server):
         self.currentServer = server
         
+        
+##### Bot functionalities #####
+    
     def getMessages(self):
         # twitch message structure ->   :<user>!<user>@<user>.tmi.twitch.tv PRIVMSG #<channel> :This is a sample message
         messages = []
         data = self.getIRCData()
         if data is None:
             return messages
-        trace("Got message %s" % data, 3)
+        trace("Got message %s" % data, 2)
         if "PING :tmi.twitch.tv" in data:
-            trace("Sending pong", 2)
+            trace("Sending pong", 3)
             self.ircSend("PONG :tmi.twitch.tv")
-        matches = re.findall(":(.+)\!(.+)\@(.+).tmi.twitch.tv PRIVMSG #%s :(.+)$" % self.channel, data.lower(), re.MULTILINE)
+        matches = re.findall(":(.+)\!(.+)\@(.+).tmi.twitch.tv PRIVMSG #%s :(.+)$" % self.channel, data, re.MULTILINE)
         for match in matches:
             user = match[0]
             content = match[3].rstrip()
-            messages.append( (content, user) )
+            messages.append( (content.lower(), user) )
         return messages
     
     def parseCoordinates(self, coordsStr):
@@ -110,8 +126,8 @@ class TwitchBot(Thread):
         return (col, row)
     
     def parseMessage(self, message):
-        trace("Parsing message %s from %s" % str(message, user), 2)
         content, user = message
+        trace("Parsing message %s from %s" % (content, user), 2)
         # Check for game sequence
         coordMatches = re.findall("[a-z][0-9]{1,2}", content)
         trace(coordMatches, 1)
@@ -125,7 +141,7 @@ class TwitchBot(Thread):
                 firstMove = COLOR_WHITE
             else:
                 firstMove = 0
-            trace("First player %d" % firstMove, 1)
+            trace("First player %d" % firstMove, 2)
             
             # Change the coordinates into (col, row) tuples
             moves = []
@@ -134,7 +150,7 @@ class TwitchBot(Thread):
                 coords = self.parseCoordinates(match)
                 moves.append( (coords, color) )
                 color = otherColor(color)
-            trace("Moves %s" % str(moves), 1)
+            trace("Moves %s" % str(moves), 2)
             
             # Check if the variation has a specific origin in the game tree, then send it to the game state
             variationIndex = None
@@ -149,14 +165,20 @@ class TwitchBot(Thread):
                 else:
                     moveNumber = int(origin[0])
                     variationIndex = self.game.addVariation(moves, moveNumber)
-                    trace("Expanding previous variation %d" % variationNumber, 1)
+                    trace("Creating variation %d from move %d" % (variationIndex, moveNumber), 1)
             else:
                 variationIndex = self.game.addVariation(moves)
-                
+                trace("Creating variation %d" % variationIndex, 1)
+            
             # if len(moves) == 0 and not hasOrigin:   
                 # return
             variationSgf, nMoves = self.game.getVariation(variationIndex)
-            sabakiCom.requestVariation(variationSgf, user, nMoves)
+            if self.useSabaki:
+                sabakiCom.requestVariation(variationSgf, user, nMoves)
+            if self.greenscreenActive:
+                self.greenScreenGenerator.generateGreenScreen(moves, user)
+    
+##### Bot management #####
     
     def run(self):
         trace("Twitch bot start", 1)
@@ -171,10 +193,8 @@ class TwitchBot(Thread):
         
     def stop(self):
         self.running = False
-        
-    def generateGreenScreen(self, variation, user):
-        pass
-        
+    
+
 def getTwitchBot(gameState):
     bot = TwitchBot(gameState)
     return bot
