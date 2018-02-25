@@ -9,6 +9,8 @@ from util import trace, letterToCol, settings
 from go_game import COLOR_BLACK, COLOR_WHITE, otherColor
 from greenscreen import GreenScreenGenerator
 
+sabakiCom = None
+
 class TwitchBot(Thread):
     
     def __init__(self, game):
@@ -18,7 +20,9 @@ class TwitchBot(Thread):
         self.useServerCoordinates = settings["use_server_coordinates"]
         self.useSabaki = settings["use_sabaki"]
         if self.useSabaki:
-            from sabaki_com import comInstance as sabakiCom
+            from sabaki_com import comInstance
+            global sabakiCom
+            sabakiCom = comInstance
         
         self.channel = settings["twitch_channel"]
         self.refreshRate = settings["twitch_chat_refresh_delay"]

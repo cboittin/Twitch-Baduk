@@ -135,6 +135,7 @@ if __name__ == "__main__":
         sabakiDir = os.path.join(os.getcwd(), "Sabaki-master")
         electronPath = os.path.join("node_modules", "electron", "dist", "electron.exe")
         os.system("cd %s && %s ./" % (sabakiDir, electronPath) )
-    mgr.twitchBot.join()
+    else:
+        mgr.twitchBot.join()
     keyboard.unhook_all()
     del mgr
