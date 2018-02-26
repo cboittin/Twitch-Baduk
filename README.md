@@ -2,8 +2,7 @@
 
 ## Description
 
-This program takes screenshots of the games you play on any application, in order to send them to the Sabaki application, and allows the twitch chat to interact with Sabaki by proposing variations.
-You can then show the Sabaki window on your stream to make interactive reviews, or to let the chat review their own moves. It can also generate a greenscreen image with the proposed variation, to display on top of your board.
+This program takes screenshots of the games you play on any application, and either sends them to the Sabaki application, and allows the twitch chat to interact with Sabaki by proposing variations, or generates an overlay image to put over the board on your streaming application, or both.
 
 Currently only works on Windows, tested with python 2.7 in windows 7.
 
@@ -11,13 +10,13 @@ Sabaki github page : <https://github.com/SabakiHQ/Sabaki>
 
 ## Usage ##
 
-Simply run sabaki_twitch.py to launch the program. Press escape from anywhere to end it (you have to close Sabaki manually as well). You can interrupt sending moves to Sabaki by pressing ctrl+K, and resume it by pressing ctrl+P again.
+Simply run twitch_baduk.py to launch the program. Press escape from anywhere to end it (you have to close Sabaki manually as well). You can interrupt sending moves to Sabaki by pressing ctrl+K, and resume it by pressing ctrl+P again.
 
 Twitch chat can send variations by writing their coordinates, for example : `k10 d16 c4 q16 r4`. It is possible to force the first move being a specific color by beginning the sequence with `b` or `w` : `b q16 r14 p17 s16 r17 r11`. Variations show in Sabaki for a few seconds, depending on the number of moves in the variation, then the game reverts to its current state. You can press ctrl+K to keep the variation on Sabaki.
 
-If double clicking the launcher doesn't work, open a command prompt, navigate to the program's folder and run `python Sabaki_twitch.py`. If this doesn't work either, check your `PATH` environment variable, and verify that it contains python's installation folder, and the Scripts subfolder inside it.
+If double clicking the launcher doesn't work, open a command prompt, navigate to the program's folder and run `python twitch_baduk.py`. If this doesn't work either, check your `PATH` environment variable, and verify that it contains python's installation folder, and the Scripts subfolder inside it.
 
-The greenscreen image is located in `greenscreen/greenscreen.png`
+The variations overlay image is located in `overlay/overlay.png`.
 
 ## Installation
 
@@ -57,7 +56,7 @@ The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, runnin
     * `twitch_bot_name` : the name of your bot in the twitch chat.
     * `twitch_bot_oauth` : a generated password to identify your bot, that you can get from <https://twitchapps.com/tmi>.
 
-#### Set up the window capture and/or add new applications to capture
+#### Set up the window capture and/or add new applications to capture -- Optional --
 * Open `settings.json`
 * The applications are listed under the `servers` property. A server is composed of the following properties.
     * `name` : an identifier for the program.
@@ -92,10 +91,10 @@ To help you finding the proper settings, you can set the `setup_capture` propert
 * `base_variation_displaying_time`: Base time a variation stays on screen.
 * `variation_displaying_time_per_stone`: Additional time a variation stays on screen, depending on the number of moves in it.
 
-#### Greenscreen & sabaki
-* `generate_greenscreen_image` : generate the greenscreen image when tiwtch proposes a variation
-* `greenscreen_image_path`: `./greenscreen/greenscreen.png`,
-* `greenscreen_padding_left`, `greenscreen_padding_right`, `greenscreen_padding_top`, `greenscreen_padding_bottom` : reduces the area of the greenscreen in which to display the moves
+#### Overlay & Sabaki
+* `generate_overlay_image` : generate the overlay image when tiwtch proposes a variation
+* `overlay_image_path`: `./overlay/overlay.png`,
+* `overlay_padding_left`, `overlay_padding_right`, `overlay_padding_top`, `overlay_padding_bottom` : reduces the area of the overlay in which to display the moves
 * `use_sabaki` : Launch sabaki with the program, and the window capture to generate go games
 * `time_between_captures`: Time in seconds between 2 window captures. Decrease for more responsiveness, increase if it slows your computer down.
 
@@ -111,7 +110,7 @@ To help you finding the proper settings, you can set the `setup_capture` propert
 ## How to navigate to a directory with the command prompt
 Use the command `cd`, which stands for "change directory".
 
-    examples :   cd C:\Users\Me\Desktop\twitch-Sabaki-bot
+    examples :   cd C:\Users\Me\Desktop\twitch-baduk
                 cd Sabaki-master
 
 On windows, if the program's folder is on the D: drive, you can change the drive by entering `d:`.

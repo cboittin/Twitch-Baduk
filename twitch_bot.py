@@ -7,7 +7,7 @@ import datetime
 
 from util import trace, letterToCol, settings
 from go_game import COLOR_BLACK, COLOR_WHITE, otherColor
-from greenscreen import GreenScreenGenerator
+from board_overlay import VariationOverlayGenerator
 
 sabakiCom = None
 
@@ -33,9 +33,9 @@ class TwitchBot(Thread):
         self.currentServer = None
         self.lastPing = None
         
-        self.greenscreenActive = settings["generate_greenscreen_image"]
-        if self.greenscreenActive:
-            self.greenScreenGenerator = GreenScreenGenerator()
+        self.overlayActive = settings["generate_overlay_image"]
+        if self.overlayActive:
+            self.variationOverlayGenerator = VariationOverlayGenerator()
         
         self.initSocket()
         
@@ -138,11 +138,14 @@ class TwitchBot(Thread):
         if len(coordMatches) > 0:
             trace("Found coordinates from twitch chat !", 1)
             
+            forcedColor = False
             # Check if there is a color for the first move
             if re.match("b [a-z][0-9]{1,2}", content):
                 firstMove = COLOR_BLACK
+                forcedColor = True
             elif re.match("w [a-z][0-9]{1,2}", content):
                 firstMove = COLOR_WHITE
+                forcedColor = True
             else:
                 firstMove = 0
             trace("First player %d" % firstMove, 2)
@@ -179,9 +182,9 @@ class TwitchBot(Thread):
             variationSgf, nMoves = self.game.getVariation(variationIndex)
             if self.useSabaki:
                 sabakiCom.requestVariation(variationSgf, user, nMoves)
-            if self.greenscreenActive:
-                self.greenScreenGenerator.generateGreenScreen(moves, user)
-    
+            if self.overlayActive:
+                self.variationOverlayGenerator.generateOverlay(moves, user, forcedColor)
+
 ##### Bot management #####
     
     def run(self):
