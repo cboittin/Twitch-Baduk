@@ -1,12 +1,10 @@
-import win32gui
-import win32ui
 from ctypes import windll
 import time
 import os
 from threading import Thread
-import io
-import StringIO
 
+import win32gui
+import win32ui
 import pyscreenshot as ImageGrab
 import PIL
 
@@ -139,29 +137,6 @@ class ScreenshotDaemon(Thread):
                 self.game.updateGame(board)
                 return
                 
-                # if win32gui.GetForegroundWindow() == hwnd: # Check that the active window didn't change during the previous operations
-                    # img = ImageGrab.grab( (l, t, r, b) )
-                    # if self.debugCapture:
-                        # img.show()
-                        # # img.save(os.path.join("C:\\", "Users", "Me", "path, "to", "folder", str(self.counter) + ".jpg"))
-                    # img = img.resize((19, 19), PIL.Image.BOX)
-                    
-                    # board = []
-                    
-                    # for i in range(19):
-                        # col = []
-                        # for j in range(19):
-                            # color = replacePixel(img, (i, j))
-                            # col.append(color)
-                        # board.append(col)
-                        
-                    # if self.debugCapture:
-                        # img.show()
-                        
-                    # self.twitchBot.setCurrentServer(name)
-                    # self.game.updateGame(board)
-                # return
-    
     def run(self):
         trace("Game capture daemon start", 1)
         self.active = True

@@ -91,14 +91,17 @@ class SabakiCommunication(Thread):
         trace("Websocket server start", 1)
         tornado.ioloop.IOLoop.instance().start()
         trace("Websocket server end", 1)
-        
+    
     def stop(self):
         self.wsHandler.close()
         tornado.ioloop.IOLoop.instance().stop()
         
     def closeSabaki(self):
         trace("Sending close request to Sabaki", 1)
-        self.wsHandler.write_message(json.dumps({"action": "close"}, separators=(",", ":") ))
+        try:
+            self.wsHandler.write_message(json.dumps({"action": "close"}, separators=(",", ":") ))
+        except AttributeError:
+            trace("Warning : Couldn't send a quit request to sabaki.", 0)
 
     def sendGame(self, sgf):
         trace("Sending game to sabaki", 1)
@@ -106,7 +109,10 @@ class SabakiCommunication(Thread):
 
     def sendVariation(self, sgf):
         trace("Sending variation to sabaki", 1)
-        self.wsHandler.write_message(json.dumps({"action": "play", "data": sgf}, separators=(",", ":") ))
+        try:
+            self.wsHandler.write_message(json.dumps({"action": "play", "data": sgf}, separators=(",", ":") ))
+        except AttributeError:
+            trace("Warning : Couldn't send variation to Sabaki.", 0)
         
     def updateGameState(self, sgf):
         self.gameState = sgf

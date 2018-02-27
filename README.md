@@ -21,14 +21,15 @@ The variations overlay image is located in `overlay/overlay.png`.
 ## Installation
 
 In order to use the program, you'll need node.js (for Sabaki), python 2.7 and the listed modules (for this program), and the source files from this repo.
-Then, you'll have to set up the window capture properties so that they fit your screen and resolution, for each application you want to use with this program. 
+Then, you'll have to set up the window capture properties so that they fit your screen and resolution, for each application you want to use with this program.
+If you're not going to use Sabaki but only the goban overlay, then you only python and its libraries, and you only need follow step 1 to 3 of the installation process.
 
 The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, running in fullscreen for a resolution of 1680x1050 on Windows 7.
 
 #### Install node.js
 * from : <https://nodejs.org/en/>
 
-#### Install python and its libraries
+#### 1. Install python and its libraries
 * Get python from : <https://www.python.org/downloads/release/python-2714/> (Usually comes pre-installed on linux)
 * Install each of the following packages with `pip install <package name>`
     * keyboard
@@ -38,25 +39,30 @@ The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, runnin
     * PIL
     * pyscreenshot
 
-#### Install the program
+#### 2. Install the program
 * download as zip
 * unzip anywhere on your computer
-* open a command line
-* go to Sabaki-master
-* run command `npm install`
-* run command `npm run build`
-* run command `npm start` to check if everything works correctly
-    * close Sabaki
-
-#### Set up your twitch bot
 * Rename `settings.json.example` into `settings.json`
+* Open settings.json in a notepad 
+    * find `generate_overlay_image` and set it to `false` if you don't want to use the overlay image
+    * find `use_sabaki` and set it to `false` if you don't want to use Sabaki
+
+#### 3. Set up your twitch bot
 * Open `settings.json`.
 * Fill in the 3 first properties.
     * `twitch_channel` : your channel's name in lowercase.
     * `twitch_bot_name` : the name of your bot in the twitch chat.
     * `twitch_bot_oauth` : a generated password to identify your bot, that you can get from <https://twitchapps.com/tmi>.
 
-#### Set up the window capture and/or add new applications to capture -- Optional --
+#### 4. Install Sabaki
+* open a command line (See )
+* go to Sabaki-master
+* run command `npm install`
+* run command `npm run build`
+* run command `npm start` to check if everything works correctly
+    * close Sabaki
+
+#### 5. Set up the window capture and/or add new applications to capture -- Optional --
 * Open `settings.json`
 * The applications are listed under the `servers` property. A server is composed of the following properties.
     * `name` : an identifier for the program.
@@ -108,6 +114,7 @@ To help you finding the proper settings, you can set the `setup_capture` propert
 * Probably some bug fixing
 
 ## How to navigate to a directory with the command prompt
+To open a command prompt on windows, open the start menu and type `cmd`. On most linux installations, press `ctrl+alt+T`.
 Use the command `cd`, which stands for "change directory".
 
     examples :   cd C:\Users\Me\Desktop\twitch-baduk

@@ -190,7 +190,10 @@ class Group:
         self.liberties.add(lib)
     
     def removeLiberty(self, lib):
-        self.liberties.remove(lib)
+        try:
+            self.liberties.remove(lib)
+        except KeyError:
+            trace(" >>> Warning : tried to remove a liberty that doesn't exist <<<", 0)
         
     def merge(self, other):
         """ Merge 2 groups together """
