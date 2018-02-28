@@ -4,15 +4,15 @@
 
 This program takes screenshots of the games you play on any application, and either sends them to the Sabaki application, and allows the twitch chat to interact with Sabaki by proposing variations, or generates an overlay image to put over the board on your streaming application, or both.
 
-Currently only works on Windows, tested with python 2.7 in windows 7.
+Currently only works on Windows, tested with python 2.7 and 3.6 in windows 7.
 
 Sabaki github page : <https://github.com/SabakiHQ/Sabaki>
 
 ## Usage ##
 
-Simply run twitch_baduk.py to launch the program. Press escape from anywhere to end it (you have to close Sabaki manually as well). You can interrupt sending moves to Sabaki by pressing ctrl+K, and resume it by pressing ctrl+P again.
+Simply run `twitch_baduk.py` to launch the program. Press escape from anywhere to end it (you have to close Sabaki manually as well). You can interrupt sending moves to Sabaki by pressing ctrl+K, and resume it by pressing ctrl+P again.
 
-Twitch chat can send variations by writing their coordinates, for example : `k10 d16 c4 q16 r4`. It is possible to force the first move being a specific color by beginning the sequence with `b` or `w` : `b q16 r14 p17 s16 r17 r11`. Variations show in Sabaki for a few seconds, depending on the number of moves in the variation, then the game reverts to its current state. You can press ctrl+K to keep the variation on Sabaki.
+Twitch chat can send variations by writing their coordinates, for example : `k10 d16 c4 q16 r4`. It is possible to force the first move being a specific color by beginning the sequence with `b` or `w` : `b q16 r14 p17 s16 r17 r11`. Variations show in Sabaki and/or on the overlay for a few seconds, depending on the number of moves in the variation, then the game reverts to its current state. You can press ctrl+K to prevent Sabaki from reverting to the game state or receiving new variations.
 
 If double clicking the launcher doesn't work, open a command prompt, navigate to the program's folder and run `python twitch_baduk.py`. If this doesn't work either, check your `PATH` environment variable, and verify that it contains python's installation folder, and the Scripts subfolder inside it.
 
@@ -20,17 +20,14 @@ The variations overlay image is located in `overlay/overlay.png`.
 
 ## Installation
 
-In order to use the program, you'll need node.js (for Sabaki), python 2.7 and the listed modules (for this program), and the source files from this repo.
+In order to use the program, you'll need node.js (for Sabaki), python and the listed modules, and the source files from this repo.
 Then, you'll have to set up the window capture properties so that they fit your screen and resolution, for each application you want to use with this program.
-If you're not going to use Sabaki but only the goban overlay, then you only python and its libraries, and you only need follow step 1 to 3 of the installation process.
+If you're not going to use Sabaki but only the goban overlay, then you only need python and its libraries, and you don't have to follow step 4 and 5 of the installation process. You'll have to disable Sabaki in the settings of the program.
 
 The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, running in fullscreen for a resolution of 1680x1050 on Windows 7.
 
-#### Install node.js
-* from : <https://nodejs.org/en/>
-
 #### 1. Install python and its libraries
-* Get python from : <https://www.python.org/downloads/release/python-2714/> (Usually comes pre-installed on linux)
+* Get python from : <https://www.python.org/downloads/release/python-2714/> (Usually comes pre-installed on linux). If you already have any version of python installed, use that one.
 * Install each of the following packages with `pip install <package name>`
     * keyboard
     * simplejson
@@ -54,7 +51,8 @@ The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, runnin
     * `twitch_bot_name` : the name of your bot in the twitch chat.
     * `twitch_bot_oauth` : a generated password to identify your bot, that you can get from <https://twitchapps.com/tmi>.
 
-#### 4. Install Sabaki
+#### 4. Install Sabaki -- Optional --
+* Install node.js from : <https://nodejs.org/en/>
 * open a command line (See )
 * go to Sabaki-master
 * run command `npm install`
@@ -73,7 +71,7 @@ The default settings work with IGS/Pandanet, Foxwq, Tygem and CrazyStone, runnin
 
 You can add any application you want by copy-pasting the properties for an existing application and replacing their values.
 
-#### Setting up the window capture
+## Setting up the window capture
 
 The program uses a simplistic image recognition technique to turn the window capture into a go board position. The cropping therefore needs to be as accurate as possible.
 
@@ -110,6 +108,7 @@ To help you finding the proper settings, you can set the `setup_capture` propert
 * Add hotkey to save sgf
 * OBS plugin to switch scenes when a variation is proposed
 * Find a way to detect snapbacks when 2 moves have been played before last update
+* Allow chat to restore a previous game state, or expand on a previous variation
 * Code cleaning
 * Probably some bug fixing
 
