@@ -8,16 +8,6 @@ COLOR_WHITE = -1
 def otherColor(color):
     return color * -1
 
-def remove_duplicates(li):
-    """ Inefficient method, but used on lists of size 4 max so it doesn't matter """
-    remove = []
-    for i in range(len(li)):
-        item = li[i]
-        if item in li[i+1:]:
-            remove.append(item)
-    for item in remove:
-        li.remove(item)
-
 class Node:
     def __init__(self, color, data, moveNumber, markup=None):
         if color == COLOR_BLACK:
@@ -240,10 +230,10 @@ class Board:
         else:
             # Add the stone to one nearby group, then bind any other adjacent group to it
             ref = friends.pop()
-            ref.addStone(pos, libs)
             for i in range(len(friends)):
                 group = friends.pop()
                 self.mergeGroups(ref, group)
+            ref.addStone(pos, libs)
             groupID = ref.id
         x, y = pos
         self.board[x][y] = groupID
@@ -301,14 +291,20 @@ class Board:
             else:
                 enemies.add(group)
         return (friends, enemies, libs)
-        
+    
     def toStr(self):
-        s = ""
+        s = "   "
+        for x in range(19):
+            s+= chr(x+65) + " "
+        s += "\n"
         for y in range(19):
+            s+= str(y+1) + " "
+            if y < 9:
+                s += " "
             for x in range(19):
-                if self[x, y] == COLOR_BLACK: s+= "+"
-                elif self[x, y] == COLOR_WHITE: s+= "-"
-                else: s+= " "
+                if self[x, y] == COLOR_BLACK: s+= "+ "
+                elif self[x, y] == COLOR_WHITE: s+= "- "
+                else: s+= "  "
             s += "\n"
         return s
     
