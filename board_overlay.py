@@ -99,7 +99,7 @@ class VariationOverlayGenerator:
                 drawContext.ellipse( (left + offset*7, top  + offset*7, right - offset*7, bottom - offset*7), outline=(205,200,60,0), fill=(205,200,60,0) )
             
             # Draw the move number
-            moveNumber = str(i)
+            moveNumber = str(i+1)
             w, h = drawContext.textsize(moveNumber, font=self.ovFont)
             W = right - left
             H = bottom - top
@@ -119,6 +119,10 @@ class VariationOverlayGenerator:
         # output.save(self.ovImagePath)
         
         t = self.baseTimeVariation + len(variation) * self.timePerStone
-        self.timer.addImage(output, t)
-        self.timer.start()
+        if self.timer.running:
+            self.timer.addImage(output, t)
+        else:
+            self.timer = OverlayTimer(self)
+            self.timer.addImage(output, t)
+            self.timer.start()
     
